@@ -1,6 +1,9 @@
 # All-in-One Media Converter
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+[![Download](https://img.shields.io/badge/Download-v1.0.0-6366F1?style=flat)](https://github.com/JannersLSR/aoi-file-converter/releases/download/v1.0.0/MediaConverter.exe)
+
+> **[⬇ Download MediaConverter.exe (v1.0.0)](https://github.com/JannersLSR/aoi-file-converter/releases/download/v1.0.0/MediaConverter.exe)** — Windows 10/11 x64 · No install required
 
 A high-performance, premium desktop application for batch cross-converting media files. Built with a refined dark mode user interface inspired by modern design systems, the application integrates a robust multi-threaded transcode engine capable of seamless, non-blocking 5x5 cross-conversions.
 
