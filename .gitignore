@@ -1,0 +1,27 @@
+# --- Python Cache ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# --- User Configuration & Data Persistence ---
+settings.json
+history.json
+
+# --- OS Specific ---
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# --- Build & Compilation Outputs ---
+build/
+dist/
+*.spec
+*.exe
+
+# --- Virtual Environments ---
+venv/
+.venv/
+env/
+.env
