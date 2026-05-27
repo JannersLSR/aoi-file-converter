@@ -1,5 +1,7 @@
 # All-in-One Media Converter
 
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+
 A high-performance, premium desktop application for batch cross-converting media files. Built with a refined dark mode user interface inspired by modern design systems, the application integrates a robust multi-threaded transcode engine capable of seamless, non-blocking 5x5 cross-conversions.
 
 ---
@@ -28,28 +30,26 @@ A high-performance, premium desktop application for batch cross-converting media
 The application is decomposed into three high-integrity Python modules:
 
 1. **`app.py`**: The visual presentation and interface layer. Handles responsive widgets, scrolling boundaries, dialog geometry centering, and hover/click event bindings.
-2. **`engine.py`**: The core transcoding pipeline. Spawns, controls, and polls asynchronous OS subprocesses (FFmpeg and ImageMagick) on dedicated worker threads.
+2. **`engine.py`**: The core transcoding pipeline. Spawns, controls, and polls asynchronous OS subprocesses (FFmpeg via `imageio-ffmpeg`) on dedicated worker threads. Uses `Pillow` for animated WebP/GIF conversions that do not require a video pipeline.
 3. **`config.py`**: System settings and transcode history serialization layer mapping inputs into persistent JSON files.
 
 ---
 
 ## Prerequisites and System Dependencies
 
-To run the source code or the compiled executable, ensure that **FFmpeg** and **ImageMagick** are installed on your machine and present in your system's `PATH`:
+No external tools required. All dependencies are bundled as Python packages:
 
-1. **FFmpeg**: Required for processing all video formats (.mp4, .webm, .mov, .gif).
-   - Download from [ffmpeg.org](https://ffmpeg.org/), extract, and add the `bin` directory to your System Environment variables.
-2. **ImageMagick**: Required for conversions where `.webp` is the **source** format, and for `gif → webp`. Conversions such as `mp4 → gif`, `gif → mp4`, and `mp4 → webp` use FFmpeg only and do not require ImageMagick.
-   - Download from [imagemagick.org](https://imagemagick.org/) and verify the `magick` command is executable in your terminal.
+- **`imageio-ffmpeg`** — ships a pre-built static FFmpeg binary. No separate FFmpeg installation needed.
+- **`Pillow`** — handles animated WebP and GIF conversions natively.
+- **`tkinterdnd2`** — provides OS-level drag-and-drop support.
 
 ---
 
 ## How to Run Locally
 
 ### 1. Install Python Dependencies
-Install the required window manager drag-and-drop bindings:
 ```bash
-pip install tkinterdnd2
+pip install tkinterdnd2 imageio-ffmpeg Pillow
 ```
 
 ### 2. Launch the Application

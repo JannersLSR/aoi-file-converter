@@ -6,6 +6,9 @@ import threading
 import time
 from pathlib import Path
 
+import imageio_ffmpeg
+from PIL import Image
+
 class ConversionJob:
     def __init__(self, file_path, src_format, target_format):
         self.file_path = Path(file_path)
@@ -31,13 +34,24 @@ class ConversionJob:
 class ConverterEngine:
     def __init__(self, settings):
         self.settings = settings
-        self.ffmpeg_path = "ffmpeg"
-        self.magick_path = "magick"
         self.validate_engines()
 
     def validate_engines(self):
-        self.ffmpeg_available = shutil.which(self.ffmpeg_path) is not None
-        self.magick_available = shutil.which(self.magick_path) is not None
+        try:
+            self.ffmpeg_path = imageio_ffmpeg.get_ffmpeg_exe()
+            self.ffmpeg_available = True
+        except Exception:
+            self.ffmpeg_path = "ffmpeg"
+            self.ffmpeg_available = shutil.which("ffmpeg") is not None
+
+        try:
+            from PIL import Image as _img  # noqa: F401
+            self.pillow_available = True
+        except ImportError:
+            self.pillow_available = False
+
+        # kept for UI compatibility
+        self.magick_available = self.pillow_available
 
     def run_command(self, cmd, job: ConversionJob, on_progress=None, start_prog=0.1, end_prog=0.9):
         if job.cancelled:
@@ -138,9 +152,9 @@ class ConverterEngine:
             # Check engines
             if src_ext in [".gif", ".mp4", ".webm", ".mov", ".webp"] and not self.ffmpeg_available:
                 raise Exception("FFmpeg not found. Please install FFmpeg.")
-            needs_magick = (src_ext == ".webp") or (src_ext == ".gif" and dest_ext == ".webp")
-            if needs_magick and not self.magick_available:
-                raise Exception("ImageMagick not found. Please install ImageMagick.")
+            needs_pillow = (src_ext == ".webp") or (src_ext == ".gif" and dest_ext == ".webp")
+            if needs_pillow and not self.pillow_available:
+                raise Exception("Pillow not found. Run: pip install Pillow")
 
             # --- CONVERSION ROUTINES ---
             # 1. WebP to MP4
@@ -148,14 +162,14 @@ class ConverterEngine:
                 fd, temp_gif = tempfile.mkstemp(suffix=".gif")
                 os.close(fd)
                 job.temp_files.append(temp_gif)
-                
-                cmd1 = [self.magick_path, str(job.file_path), "-coalesce", temp_gif]
-                self.run_command(cmd1, job, on_progress=on_progress, start_prog=0.1, end_prog=0.5)
-                
+
+                img = Image.open(str(job.file_path))
+                img.save(temp_gif, save_all=True)
+
                 job.progress = 0.5
                 if on_progress:
                     on_progress(job)
-                
+
                 cmd2 = [
                     self.ffmpeg_path, "-y", "-f", "gif", "-i", temp_gif,
                     "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2",
@@ -231,13 +245,19 @@ class ConverterEngine:
 
             # 9. WEBP to GIF
             elif src_ext == ".webp" and dest_ext == ".gif":
-                cmd = [self.magick_path, str(job.file_path), "-coalesce", str(job.dest_path)]
-                self.run_command(cmd, job, on_progress=on_progress, start_prog=0.1, end_prog=0.9)
+                img = Image.open(str(job.file_path))
+                img.save(str(job.dest_path), save_all=True)
+                job.progress = 0.9
+                if on_progress:
+                    on_progress(job)
 
             # 10. GIF to WEBP
             elif src_ext == ".gif" and dest_ext == ".webp":
-                cmd = [self.magick_path, str(job.file_path), str(job.dest_path)]
-                self.run_command(cmd, job, on_progress=on_progress, start_prog=0.1, end_prog=0.9)
+                img = Image.open(str(job.file_path))
+                img.save(str(job.dest_path), save_all=True, loop=0)
+                job.progress = 0.9
+                if on_progress:
+                    on_progress(job)
 
             # 11. GENERAL TRANSCODE VIA MP4 (FALLBACK PATHWAY)
             else:

@@ -243,10 +243,10 @@ class MediaConvertApp(TkinterDnD.Tk):
         self.engine_dot = tk.Label(bottom_pad, text="● ENGINE READY", font=("Segoe UI Bold", 8), fg=self.green, bg=self.bg_color)
         self.engine_dot.pack(side=tk.RIGHT)
         
-        if not self.converter.ffmpeg_available or not self.converter.magick_available:
+        if not self.converter.ffmpeg_available or not self.converter.pillow_available:
             missing = []
             if not self.converter.ffmpeg_available: missing.append("FFmpeg")
-            if not self.converter.magick_available: missing.append("ImageMagick")
+            if not self.converter.pillow_available: missing.append("Pillow")
             self.engine_dot.configure(text=f"● MISSING {', '.join(missing)}", fg="red")
 
     def show_dnd_state(self):
